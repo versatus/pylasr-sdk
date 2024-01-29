@@ -370,7 +370,12 @@ class TokenUpdateField:
 
 
 class TokenUpdate:
-    def __init__(self, account, token, updates):
+    def __init__(
+        self,
+        account: AddressOrNamespace,
+        token: AddressOrNamespace,
+        updates: List[TokenUpdateField]
+    ):
         self.account = account
         self.token = token
         self.updates = updates
@@ -527,8 +532,8 @@ class ProgramUpdate:
 
 
 class TokenOrProgramUpdate(Enum):
-    TOKEN_UPDATE_FIELD = TokenUpdateField
-    PROGRAM_UPDATE_FIELD = ProgramUpdateField
+    TOKEN_UPDATE = TokenUpdate
+    PROGRAM_UPDATE = ProgramUpdate
 
     def to_dict(self):
         return self.value.to_dict()
@@ -681,19 +686,31 @@ class Outputs:
 
 
 class TokenUpdateBuilder:
-    def __init__(self, account, token):
-        self.account = account
-        self.token = token
+    def __init__(
+        self,
+        account: Optional[AddressOrNamespace] = None,
+        token: Optional[AddressOrNamespace] = None
+    ):
+        self.account = None
+        self.token = None
         self.updates = []
+
+    def add_update_account_address(self, account: AddressOrNamespace):
+        self.account = account
+        return self
+
+    def add_token_address(self, token_address: AddressOrNamespace):
+        self.token = token_address
+        return self
 
     def add_update_field(self, update_field):
         self.updates.append(update_field)
         return self
 
-    def build(self):
+    def build(self) -> TokenUpdate:
         return TokenUpdate(
-            AddressOrNamespace("Address", self.account).to_dict(),
-            AddressOrNamespace("Address", self.token).to_dict(),
+            self.account.to_dict(),
+            self.token.to_dict(),
             self.updates
         )
 
