@@ -2,3 +2,4 @@ build/
 dist/
 *.egg*
 PyPI-Recovery-Codes-asversatus-2024-01-29T06_15_12.173478.txt
+.env
