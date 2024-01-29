@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import List, Dict, Tuple, Optional
 
 
@@ -6,7 +5,7 @@ class Address:
     def __init__(self, address_bytes):
         if len(address_bytes) != 20:
             raise ValueError("Address must be 20 bytes long")
-        self.address_bytes = address_bytes
+        self.address_bytes = bytes(address_bytes)
 
     def to_dict(self):
         return {"Address": f"0x{self.address_bytes.hex()}"}
@@ -82,9 +81,9 @@ class Debit:
         return {"Debit": self.value.to_hex()}
 
 
-class BalanceValue(Enum):
-    CREDIT = Credit
-    DEBIT = Debit
+class BalanceValue:
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
         return {"Balance": self.value.to_dict()}
@@ -115,10 +114,9 @@ class TokenMetadataRemove:
         return {"Remove": self.key}
 
 
-class TokenMetadataValue(Enum):
-    INSERT = TokenMetadataInsert
-    EXTEND = TokenMetadataExtend
-    REMOVE = TokenMetadataRemove
+class TokenMetadataValue:
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
         return {"Metadata": self.value.to_dict()}
@@ -165,12 +163,9 @@ class TokenIdRemove:
         return {"Remove": self.key.to_dict()}
 
 
-class TokenIdValue(Enum):
-    PUSH = TokenIdPush
-    EXTEND = TokenIdExtend
-    INSERT = TokenIdInsert
-    POP = TokenIdPop
-    REMOVE = TokenIdRemove
+class TokenIdValue:
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
         return {"TokenIds": self.value.to_dict()}
@@ -220,11 +215,9 @@ class AllowanceRevoke:
         return {"Revoke": self.key.to_dict()}
 
 
-class AllowanceValue(Enum):
-    INSERT = AllowanceInsert
-    EXTEND = AllowanceExtend
-    REMOVE = AllowanceRemove
-    REVOKE = AllowanceRevoke
+class AllowanceValue:
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
         return {"Allowance": self.value.to_dict()}
@@ -276,11 +269,9 @@ class ApprovalsRevoke:
         return {"Revoke": self.key.to_dict()}
 
 
-class ApprovalsValue(Enum):
-    INSERT = ApprovalsInsert
-    EXTEND = ApprovalsExtend
-    REMOVE = ApprovalsRemove
-    REVOKE = ApprovalsRevoke
+class ApprovalsValue:
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
         return {"Approvals": self.value.to_dict()}
@@ -311,47 +302,34 @@ class TokenDataRemove:
         return {"Remove": self.key}
 
 
-class TokenDataValue(Enum):
-    INSERT = TokenDataInsert
-    EXTEND = TokenDataExtend
-    REMOVE = TokenDataRemove
+class TokenDataValue:
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
         return {"Data": self.value.to_dict()}
 
 
-class StatusValue(Enum):
-    REVERSE = "Reverse"
-    LOCK = "Lock"
-    UNLOCK = "Unlock"
+class StatusValue:
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
-        return {"Status": {"StatusValue": self.value}}
+        return {"StatusValue": self.value}
 
 
-class TokenFieldValue(Enum):
-    BALANCE = BalanceValue
-    METADATA = TokenMetadataValue
-    TOKEN_IDS = TokenIdValue
-    ALLOWANCE = AllowanceValue
-    APPROVALS = ApprovalsValue
-    DATA = TokenDataValue
-    STATUS = StatusValue
+class TokenFieldValue:
+    def __init__(self, kind: str, value):
+        self.kind = kind
+        self.value = value
 
     def to_dict(self):
-        return self.value.to_dict()
+        return {self.kind: self.value.to_dict()}
 
 
-class TokenField(Enum):
-    PROGRAM_ID = "ProgramId"
-    OWNER_ID = "OwnerId"
-    BALANCE = "Balance"
-    METADATA = "Metadata"
-    TOKEN_IDS = "TokenIds"
-    ALLOWANCE = "Allowance"
-    APPROVALS = "Approvals"
-    DATA = "Data"
-    STATUS = "Status"
+class TokenField:
+    def __init__(self, value: str):
+        self.value = value
 
     def to_dict(self):
         return self.value
@@ -481,30 +459,28 @@ class ProgramDataRemove:
 
 
 class ProgramDataValue:
-    INSERT = ProgramDataInsert
-    EXTEND = ProgramDataExtend
-    REMOVE = ProgramDataRemove
+    def __init__(self, value):
+        self.value = value
 
     def to_dict(self):
         return {"Data": self.value.to_dict()}
 
 
-class ProgramFieldValue(Enum):
-    LINKED_PROGRAMS = LinkedProgramsValue
-    METADATA = ProgramMetadataValue
-    DATA = ProgramDataValue
+class ProgramFieldValue:
+    def __init__(self, kind: str, value):
+        self.kind = kind
+        self.value = value
 
     def to_dict(self):
-        return self.value.to_dict()
+        return {self.kind: self.value.to_dict()}
 
 
-class ProgramField(Enum):
-    LINKED_PROGRAMS = "LinkedPrograms"
-    METADATA = "Metadata"
-    DATA = "Data"
+class ProgramField:
+    def __init__(self, kind: str):
+        self.kind = kind
 
     def to_dict(self):
-        pass
+        return self.kind
 
 
 class ProgramUpdateField:
@@ -531,12 +507,13 @@ class ProgramUpdate:
         }
 
 
-class TokenOrProgramUpdate(Enum):
-    TOKEN_UPDATE = TokenUpdate
-    PROGRAM_UPDATE = ProgramUpdate
+class TokenOrProgramUpdate:
+    def __init__(self, kind: str, value):
+        self.kind = kind
+        self.value = value
 
     def to_dict(self):
-        return self.value.to_dict()
+        return {self.kind: self.value.to_dict()}
 
 
 class TokenDistribution:
@@ -660,15 +637,15 @@ class LogInstruction:
         return {}
 
 
-class Instruction(Enum):
-    CREATE = CreateInstruction
-    UPDATE = UpdateInstruction
-    TRANSFER = TransferInstruction
-    BURN = BurnInstruction
-    LOG = LogInstruction
+class Instruction:
+    def __init__(self, kind: str, value):
+        self.kind = kind
+        self.value = value
 
     def to_dict(self):
-        return self.value.to_dict()
+        return {
+            self.kind: self.value.to_dict()
+        }
 
 
 class Outputs:
