@@ -8,7 +8,7 @@ class Address:
         self.address_bytes = bytes(address_bytes)
 
     def to_dict(self):
-        return {"Address": f"0x{self.address_bytes.hex()}"}
+        return {"address": f"0x{self.address_bytes.hex()}"}
 
     @staticmethod
     def from_hex(hex_str):
@@ -50,7 +50,7 @@ class Namespace:
         self.namespace = namespace
 
     def to_dict(self):
-        return {"Namespace": self.namespace}
+        return {"namespace": self.namespace}
 
 
 class AddressOrNamespace:
@@ -60,7 +60,7 @@ class AddressOrNamespace:
 
     def to_dict(self):
         if self.value == "This":
-            return "This"
+            return "this"
         else:
             return self.value.to_dict()
 
@@ -70,7 +70,7 @@ class Credit:
         self.value = value
 
     def to_dict(self):
-        return {"Credit": self.value.to_hex()}
+        return {"credit": self.value.to_hex()}
 
 
 class Debit:
@@ -78,7 +78,7 @@ class Debit:
         self.value = value
 
     def to_dict(self):
-        return {"Debit": self.value.to_hex()}
+        return {"debit": self.value.to_hex()}
 
 
 class BalanceValue:
@@ -86,7 +86,7 @@ class BalanceValue:
         self.value = value
 
     def to_dict(self):
-        return {"Balance": self.value.to_dict()}
+        return {"balance": self.value.to_dict()}
 
 
 class TokenMetadataInsert:
@@ -95,7 +95,7 @@ class TokenMetadataInsert:
         self.value = value
 
     def to_dict(self):
-        return {"Insert": [self.key, self.value]}
+        return {"insert": [self.key, self.value]}
 
 
 class TokenMetadataExtend:
@@ -103,7 +103,7 @@ class TokenMetadataExtend:
         self.map = map
 
     def to_dict(self):
-        return {"Extend": self.map}
+        return {"extend": self.map}
 
 
 class TokenMetadataRemove:
@@ -111,7 +111,7 @@ class TokenMetadataRemove:
         self.key = key
 
     def to_dict(self):
-        return {"Remove": self.key}
+        return {"remove": self.key}
 
 
 class TokenMetadataValue:
@@ -119,7 +119,7 @@ class TokenMetadataValue:
         self.value = value
 
     def to_dict(self):
-        return {"Metadata": self.value.to_dict()}
+        return {"metadata": self.value.to_dict()}
 
 
 class TokenIdPush:
@@ -127,7 +127,7 @@ class TokenIdPush:
         self.value = value
 
     def to_dict(self):
-        return {"Push": self.value.to_dict()}
+        return {"push": self.value.to_dict()}
 
 
 class TokenIdExtend:
@@ -135,7 +135,7 @@ class TokenIdExtend:
         self.items = items
 
     def to_dict(self):
-        return {"Extend": [item.to_dict() for item in self.items]}
+        return {"extend": [item.to_dict() for item in self.items]}
 
 
 class TokenIdInsert:
@@ -144,7 +144,7 @@ class TokenIdInsert:
         self.value = value
 
     def to_dict(self):
-        return {"Insert": [self.key, self.value.to_dict()]}
+        return {"insert": [self.key, self.value.to_dict()]}
 
 
 class TokenIdPop:
@@ -152,7 +152,7 @@ class TokenIdPop:
         pass
 
     def to_dict(self):
-        return {"Pop"}
+        return {"pop"}
 
 
 class TokenIdRemove:
@@ -160,7 +160,7 @@ class TokenIdRemove:
         self.key = key
 
     def to_dict(self):
-        return {"Remove": self.key.to_dict()}
+        return {"remove": self.key.to_dict()}
 
 
 class TokenIdValue:
@@ -168,7 +168,7 @@ class TokenIdValue:
         self.value = value
 
     def to_dict(self):
-        return {"TokenIds": self.value.to_dict()}
+        return {"tokenIds": self.value.to_dict()}
 
 
 class AllowanceInsert:
@@ -177,7 +177,7 @@ class AllowanceInsert:
         self.value = value
 
     def to_dict(self):
-        return {"Insert": [self.key.to_dict(), self.value.to_dict()]}
+        return {"insert": [self.key.to_dict(), self.value.to_dict()]}
 
 
 class AllowanceExtend:
@@ -186,7 +186,7 @@ class AllowanceExtend:
 
     def to_dict(self):
         return {
-            "Extend": [
+            "extend": [
                 [item[0].to_dict(),
                  item[1].to_dict()
                  ] for item in self.items
@@ -201,7 +201,7 @@ class AllowanceRemove:
 
     def to_dict(self):
         return {
-            "Remove": [
+            "remove": [
                 self.key.to_dict(),
                 [inner.to_dict() for inner in self.items]
             ]}
@@ -212,7 +212,7 @@ class AllowanceRevoke:
         self.key = key
 
     def to_dict(self):
-        return {"Revoke": self.key.to_dict()}
+        return {"revoke": self.key.to_dict()}
 
 
 class AllowanceValue:
@@ -220,7 +220,7 @@ class AllowanceValue:
         self.value = value
 
     def to_dict(self):
-        return {"Allowance": self.value.to_dict()}
+        return {"allowance": self.value.to_dict()}
 
 
 class ApprovalsInsert:
@@ -229,7 +229,7 @@ class ApprovalsInsert:
         self.value = value
 
     def to_dict(self):
-        return {"Insert": [
+        return {"insert": [
             self.key.to_dict(), [inner.to_dict() for inner in self.value]
         ]}
 
@@ -240,7 +240,7 @@ class ApprovalsExtend:
 
     def to_dict(self):
         return {
-            "Extend": [
+            "extend": [
                 [item[0].to_dict(),
                  item[1].to_dict()
                  ] for item in self.items
@@ -255,7 +255,7 @@ class ApprovalsRemove:
 
     def to_dict(self):
         return {
-            "Remove": [
+            "remove": [
                 self.key.to_dict(),
                 [inner.to_dict() for inner in self.items]
             ]}
@@ -266,7 +266,7 @@ class ApprovalsRevoke:
         self.key = key
 
     def to_dict(self):
-        return {"Revoke": self.key.to_dict()}
+        return {"revoke": self.key.to_dict()}
 
 
 class ApprovalsValue:
@@ -274,7 +274,7 @@ class ApprovalsValue:
         self.value = value
 
     def to_dict(self):
-        return {"Approvals": self.value.to_dict()}
+        return {"approvals": self.value.to_dict()}
 
 
 class TokenDataInsert:
@@ -283,7 +283,7 @@ class TokenDataInsert:
         self.value = value
 
     def to_dict(self):
-        {"Insert": [self.key, self.value]}
+        {"insert": [self.key, self.value]}
 
 
 class TokenDataExtend:
@@ -291,7 +291,7 @@ class TokenDataExtend:
         self.map = map
 
     def to_dict(self):
-        return {"Extend": self.map}
+        return {"extend": self.map}
 
 
 class TokenDataRemove:
@@ -299,7 +299,7 @@ class TokenDataRemove:
         self.key = key
 
     def to_dict(self):
-        return {"Remove": self.key}
+        return {"remove": self.key}
 
 
 class TokenDataValue:
@@ -307,7 +307,7 @@ class TokenDataValue:
         self.value = value
 
     def to_dict(self):
-        return {"Data": self.value.to_dict()}
+        return {"data": self.value.to_dict()}
 
 
 class StatusValue:
@@ -315,7 +315,7 @@ class StatusValue:
         self.value = value
 
     def to_dict(self):
-        return {"StatusValue": self.value}
+        return {"statusValue": self.value}
 
 
 class TokenFieldValue:
@@ -371,7 +371,7 @@ class LinkedProgramsInsert:
         self.key = key
 
     def to_dict(self):
-        return {"Insert": self.key.to_dict()}
+        return {"insert": self.key.to_dict()}
 
 
 class LinkedProgramsExtend:
@@ -379,7 +379,7 @@ class LinkedProgramsExtend:
         self.items = items
 
     def to_dict(self):
-        return {"Extend": [item.to_dict() for item in self.items]}
+        return {"extend": [item.to_dict() for item in self.items]}
 
 
 class LinkedProgramsRemove:
@@ -387,7 +387,7 @@ class LinkedProgramsRemove:
         self.key = key
 
     def to_dict(self):
-        return {"Remove": self.key.to_dict()}
+        return {"remove": self.key.to_dict()}
 
 
 class LinkedProgramsValue:
@@ -396,7 +396,7 @@ class LinkedProgramsValue:
     REMOVE = LinkedProgramsRemove
 
     def to_dict(self):
-        return {"LinkedPrograms": {"LinkedProgramValue": self.value.to_dict()}}
+        return {"linkedPrograms": {"linkedProgramValue": self.value.to_dict()}}
 
 
 class ProgramMetadataInsert:
@@ -405,7 +405,7 @@ class ProgramMetadataInsert:
         self.value = value
 
     def to_dict(self):
-        return {"Insert": [self.key, self.value]}
+        return {"insert": [self.key, self.value]}
 
 
 class ProgramMetadataExtend:
@@ -413,7 +413,7 @@ class ProgramMetadataExtend:
         self.map = map
 
     def to_dict(self):
-        return {"Extend": self.map}
+        return {"extend": self.map}
 
 
 class ProgramMetadataRemove:
@@ -421,7 +421,7 @@ class ProgramMetadataRemove:
         self.key = key
 
     def to_dict(self):
-        return {"Remove": self.key}
+        return {"remove": self.key}
 
 
 class ProgramMetadataValue:
@@ -430,7 +430,7 @@ class ProgramMetadataValue:
     REMOVE = ProgramMetadataRemove
 
     def to_json(self):
-        return {"Metadata": self.value.to_dict()}
+        return {"metadata": self.value.to_dict()}
 
 
 class ProgramDataInsert:
@@ -439,7 +439,7 @@ class ProgramDataInsert:
         self.value = value
 
     def to_dict(self):
-        {"Insert": [self.key, self.value]}
+        {"insert": [self.key, self.value]}
 
 
 class ProgramDataExtend:
@@ -447,7 +447,7 @@ class ProgramDataExtend:
         self.map = map
 
     def to_dict(self):
-        return {"Extend": self.map}
+        return {"extend": self.map}
 
 
 class ProgramDataRemove:
@@ -455,7 +455,7 @@ class ProgramDataRemove:
         self.key = key
 
     def to_dict(self):
-        return {"Remove": self.key}
+        return {"remove": self.key}
 
 
 class ProgramDataValue:
@@ -463,7 +463,7 @@ class ProgramDataValue:
         self.value = value
 
     def to_dict(self):
-        return {"Data": self.value.to_dict()}
+        return {"data": self.value.to_dict()}
 
 
 class ProgramFieldValue:
@@ -533,11 +533,11 @@ class TokenDistribution:
 
     def to_dict(self):
         return {
-            "program_id": self.program_id.to_dict(),
+            "programId": self.program_id.to_dict(),
             "to": self.to.to_dict(),
             "amount": "null" if self.amount is None else self.amount.to_dict(),
-            "token_ids": [item.to_dict() for item in self.token_ids],
-            "update_fields": [item.to_dict() for item in self.update_fields]
+            "tokenIds": [item.to_dict() for item in self.token_ids],
+            "updateFields": [item.to_dict() for item in self.update_fields]
         }
 
 
@@ -558,10 +558,10 @@ class CreateInstruction:
 
     def to_dict(self):
         return {
-            "program_namespace": self.program_namespace.to_dict(),
-            "program_id": self.program_id.to_dict(),
-            "program_owner": self.program_owner.to_dict(),
-            "total_supply": self.total_supply.to_dict(),
+            "programNamespace": self.program_namespace.to_dict(),
+            "programId": self.program_id.to_dict(),
+            "programOwner": self.program_owner.to_dict(),
+            "totalSupply": self.total_supply.to_dict(),
             "distribution": [
                 dist.to_dict() for dist in self.distribution
             ]
@@ -623,7 +623,7 @@ class BurnInstruction:
     def to_dict(self):
         return {
             "caller": self.caller.to_dict(),
-            "program_id": self.program_id.to_dict(),
+            "programId": self.program_id.to_dict(),
             "token": self.token.to_dict(),
             "from": self.burn_from.to_dict(),
             "amount": "null" if self.amount is None else self.amount.to_dict(),
