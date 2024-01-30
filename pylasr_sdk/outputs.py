@@ -283,7 +283,7 @@ class TokenDataInsert:
         self.value = value
 
     def to_dict(self):
-        {"insert": [self.key, self.value]}
+        return {"insert": [self.key, self.value]}
 
 
 class TokenDataExtend:
