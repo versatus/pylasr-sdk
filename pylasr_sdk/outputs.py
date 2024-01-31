@@ -1,4 +1,5 @@
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union
+from enum import Enum
 
 
 class Address:
@@ -115,7 +116,14 @@ class TokenMetadataRemove:
 
 
 class TokenMetadataValue:
-    def __init__(self, value):
+    def __init__(
+        self,
+        value: Union[
+            TokenMetadataInsert,
+            TokenMetadataExtend,
+            TokenMetadataRemove
+        ]
+    ):
         self.value = value
 
     def to_dict(self):
@@ -164,7 +172,16 @@ class TokenIdRemove:
 
 
 class TokenIdValue:
-    def __init__(self, value):
+    def __init__(
+        self,
+        value: Union[
+            TokenIdPush,
+            TokenIdPop,
+            TokenIdInsert,
+            TokenIdExtend,
+            TokenIdRemove
+        ]
+    ):
         self.value = value
 
     def to_dict(self):
@@ -216,7 +233,15 @@ class AllowanceRevoke:
 
 
 class AllowanceValue:
-    def __init__(self, value):
+    def __init__(
+        self,
+        value: Union[
+            AllowanceInsert,
+            AllowanceExtend,
+            AllowanceRemove,
+            AllowanceRevoke
+        ]
+    ):
         self.value = value
 
     def to_dict(self):
@@ -270,7 +295,15 @@ class ApprovalsRevoke:
 
 
 class ApprovalsValue:
-    def __init__(self, value):
+    def __init__(
+        self,
+        value: Union[
+            ApprovalsInsert,
+            ApprovalsExtend,
+            ApprovalsRemove,
+            ApprovalsRevoke,
+        ]
+    ):
         self.value = value
 
     def to_dict(self):
@@ -303,16 +336,23 @@ class TokenDataRemove:
 
 
 class TokenDataValue:
-    def __init__(self, value):
+    def __init__(
+        self,
+        value: Union[
+            TokenDataInsert,
+            TokenDataExtend,
+            TokenDataRemove
+        ]
+    ):
         self.value = value
 
     def to_dict(self):
         return {"data": self.value.to_dict()}
 
 
-class StatusValue:
-    def __init__(self, value):
-        self.value = value
+class StatusValue(Enum):
+    FREE = "free"
+    LOCKED = "locked"
 
     def to_dict(self):
         return {"statusValue": self.value}
@@ -390,7 +430,7 @@ class LinkedProgramsRemove:
         return {"remove": self.key.to_dict()}
 
 
-class LinkedProgramsValue:
+class LinkedProgramsValue(Enum):
     INSERT = LinkedProgramsInsert
     EXTEND = LinkedProgramsExtend
     REMOVE = LinkedProgramsRemove
@@ -778,7 +818,7 @@ class CreateInstructionBuilder:
         return self
 
     def build(self) -> CreateInstruction:
-        CreateInstruction(
+        return CreateInstruction(
             self.program_namespace,
             self.program_id,
             self.program_owner,

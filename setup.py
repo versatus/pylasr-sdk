@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pylasr_sdk",
-    version="0.1.1",
+    version="0.1.3",
     packages=find_packages(),
     description="""helpers and types for developers
     building programs for the lasr network in python""",
