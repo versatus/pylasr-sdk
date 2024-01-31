@@ -9,7 +9,7 @@ class Address:
         self.address_bytes = bytes(address_bytes)
 
     def to_dict(self):
-        return {"address": f"0x{self.address_bytes.hex()}"}
+        return f"0x{self.address_bytes.hex()}"
 
     @staticmethod
     def from_hex(hex_str):
@@ -26,7 +26,7 @@ class U256:
         return format(self.value, '064x')
 
     def to_dict(self):
-        return {'U256': f"0x{self.to_hex()}"}
+        return f"0x{self.to_hex()}"
 
     @staticmethod
     def from_list(value_list: List[int]):
@@ -45,25 +45,38 @@ class U256:
         value = int(hex_str, 16)
         return U256(value)
 
+    def __truediv__(self, other):
+        if not isinstance(other, U256):
+            raise TypeError("Division only supported between other U256 types")
+        if other.value == 0:
+            raise ZeroDivisionError("Division by zero is not possible")
+
+        return U256(self.value // other.value)
+
+    def __floordiv__(self, other):
+        return self.__truediv__(other)
+
 
 class Namespace:
     def __init__(self, namespace: str):
         self.namespace = namespace
 
     def to_dict(self):
-        return {"namespace": self.namespace}
+        return self.namespace
 
 
 class AddressOrNamespace:
-    THIS = "This"
-    ADDRESS = Address
-    NAMESPACE = Namespace
+    def __init__(self, kind: str, value: Union[str, Address, Namespace]):
+        self.kind = kind
+        self.value = value
 
     def to_dict(self):
-        if self.value == "This":
+        if self.kind == "This":
             return "this"
+        elif self.kind == "Address":
+            return {"address": self.value.to_dict()}
         else:
-            return self.value.to_dict()
+            return {"namespace": self.value.to_dict()}
 
 
 class Credit:
@@ -588,12 +601,14 @@ class CreateInstruction:
         program_id: AddressOrNamespace,
         program_owner: Address,
         total_supply: U256,
+        initialized_supply: U256,
         distribution: List[TokenDistribution]
     ):
         self.program_namespace = program_namespace
         self.program_id = program_id
         self.program_owner = program_owner
         self.total_supply = total_supply
+        self.initialized_supply = initialized_supply
         self.distribution = distribution
 
     def to_dict(self):
@@ -602,6 +617,7 @@ class CreateInstruction:
             "programId": self.program_id.to_dict(),
             "programOwner": self.program_owner.to_dict(),
             "totalSupply": self.total_supply.to_dict(),
+            "initializedSupply": self.initialized_supply.to_dict(),
             "distribution": [
                 dist.to_dict() for dist in self.distribution
             ]
@@ -823,6 +839,7 @@ class CreateInstructionBuilder:
             self.program_id,
             self.program_owner,
             self.total_supply,
+            self.initialized_supply,
             self.distribution
         )
 
