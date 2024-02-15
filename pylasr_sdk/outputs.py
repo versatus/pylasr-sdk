@@ -1,33 +1,41 @@
 from typing import List, Dict, Tuple, Optional, Union
 from enum import Enum
 
-
+# Constructor & Methods for an Ethereum style address.
 class Address:
+    # Updates the bytes of an address if it meets the lengths requirements.
+    # Length requirement is 20 bytes.
     def __init__(self, address_bytes):
         if len(address_bytes) != 20:
             raise ValueError("Address must be 20 bytes long")
         self.address_bytes = bytes(address_bytes)
 
+    # Returns an object where the key is an address and value is the hexed version of address.
     def to_dict(self):
         return {"address": f"0x{self.address_bytes.hex()}"}
 
+    # Takes a hex string representation of an address, and returns a new address.
     @staticmethod
     def from_hex(hex_str):
         if hex_str.startswith('0x'):
             hex_str = hex_str[2:]
         return Address(bytes.fromhex(hex_str))
 
-
+# Methods for working with an Ethereum style U256, little-endian large integer type 256-bit unsigned integer.
 class U256:
+    # Assignes a value to U256 type.
     def __init__(self, value):
         self.value = value
 
+    # Formats the U256 as a hex string.
     def to_hex(self):
         return format(self.value, '064x')
 
+    # Returns an object where key is U256 and value is hex string of U256's value.
     def to_dict(self):
         return {'U256': f"0x{self.to_hex()}"}
 
+    # Initalizes a new U256 from a list of four integers. All four integers must be unsigned 64-bit integers.
     @staticmethod
     def from_list(value_list: List[int]):
         if len(value_list) != 4 or not all(
@@ -38,6 +46,7 @@ class U256:
             )
         return U256(sum(x << (i * 64) for i, x in enumerate(value_list)))
 
+    # Takes a hex string representation of a U256 value, and returns a new U256 with that value.
     @staticmethod
     def from_hex(hex_str):
         if hex_str.startswith("0x"):
@@ -55,6 +64,7 @@ class Namespace:
 
 
 class AddressOrNamespace:
+    # "This" references to the item itself, when the item is not an Address or Namespace.
     THIS = "This"
     ADDRESS = Address
     NAMESPACE = Namespace
@@ -90,15 +100,19 @@ class BalanceValue:
         return {"balance": self.value.to_dict()}
 
 
+# Methods for initalizing and inserting token metadata.
 class TokenMetadataInsert:
+    # Defines a key and value for a token
     def __init__(self, key: str, value: str):
         self.key = key
         self.value = value
 
+    # Returns a dictionary object for the `insert` instruction where the value is a list containing the key and value of a token.
     def to_dict(self):
         return {"insert": [self.key, self.value]}
 
 
+# Allocates more space for TokenMetadata if needed.
 class TokenMetadataExtend:
     def __init__(self, map: Dict[str, str]):
         self.map = map
@@ -108,9 +122,11 @@ class TokenMetadataExtend:
 
 
 class TokenMetadataRemove:
+    # Defines a key for a token.
     def __init__(self, key: str):
         self.key = key
 
+    # Returns a dictionary object for the `remove` instruction requiring the key of a token.
     def to_dict(self):
         return {"remove": self.key}
 
@@ -644,6 +660,7 @@ class TransferInstruction:
 
 
 class BurnInstruction:
+    # 'Burn' or Removal instructions for token funds from caller when transaction is placed.
     def __init__(
         self,
         caller: Address,
