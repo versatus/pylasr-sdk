@@ -66,7 +66,9 @@ class Namespace:
 class AddressOrNamespace:
     # "This" references to the item itself, when the item is not an Address or Namespace.
     THIS = "This"
+    # The address pointing to an account, or token.
     ADDRESS = Address
+    # The name of an Program or Account.
     NAMESPACE = Namespace
 
     def to_dict(self):
@@ -112,7 +114,7 @@ class TokenMetadataInsert:
         return {"insert": [self.key, self.value]}
 
 
-# Allocates more space for TokenMetadata if needed.
+# Allocates more space for TokenMetadata when needed.
 class TokenMetadataExtend:
     def __init__(self, map: Dict[str, str]):
         self.map = map
@@ -130,7 +132,7 @@ class TokenMetadataRemove:
     def to_dict(self):
         return {"remove": self.key}
 
-
+# Union of methods used for creating, modifying, or removing token metadata.
 class TokenMetadataValue:
     def __init__(
         self,
@@ -146,6 +148,7 @@ class TokenMetadataValue:
         return {"metadata": self.value.to_dict()}
 
 
+# Methods for initalizing a token's identification, with an Ethereum-style value of at least 256-bits.
 class TokenIdPush:
     def __init__(self, value: U256):
         self.value = value
@@ -154,6 +157,7 @@ class TokenIdPush:
         return {"push": self.value.to_dict()}
 
 
+# Allocates more space for token id's when needed.
 class TokenIdExtend:
     def __init__(self, items: List[U256]):
         self.items = items
@@ -187,6 +191,7 @@ class TokenIdRemove:
         return {"remove": self.key.to_dict()}
 
 
+# Union of methods used for creating, modifying, or removing token identifications.
 class TokenIdValue:
     def __init__(
         self,
@@ -204,15 +209,18 @@ class TokenIdValue:
         return {"tokenIds": self.value.to_dict()}
 
 
+# Methods for initalizing and inserting an allowance tied to an Address.
 class AllowanceInsert:
     def __init__(self, key: Address, value: U256):
         self.key = key
         self.value = value
 
+    # Returns a dictionary object for the `insert` instruction where the value is the allowance of an Ethereum-style amount declared.
     def to_dict(self):
         return {"insert": [self.key.to_dict(), self.value.to_dict()]}
 
 
+# Allocates more space for Allowance's if needed.
 class AllowanceExtend:
     def __init__(self, items: List[Tuple[Address, U256]]):
         self.items = items
@@ -597,6 +605,7 @@ class TokenDistribution:
         }
 
 
+# Information used in token creation.
 class CreateInstruction:
     def __init__(
         self,
@@ -624,6 +633,7 @@ class CreateInstruction:
         }
 
 
+# A list of updates to either a token, or a program.
 class UpdateInstruction:
     def __init__(self, updates: List[TokenOrProgramUpdate]):
         self.updates = updates
@@ -634,6 +644,7 @@ class UpdateInstruction:
         }
 
 
+# Information required to make a transfer of assests from one account to another.
 class TransferInstruction:
     def __init__(
         self,
@@ -659,8 +670,8 @@ class TransferInstruction:
         }
 
 
+# Information used in token destruction.
 class BurnInstruction:
-    # 'Burn' or Removal instructions for token funds from caller when transaction is placed.
     def __init__(
         self,
         caller: Address,
