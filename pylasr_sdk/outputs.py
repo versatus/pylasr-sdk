@@ -35,7 +35,8 @@ class U256:
     def to_dict(self):
         return {'U256': f"0x{self.to_hex()}"}
 
-    # Initalizes a new U256 from a list of four integers. All four integers must be unsigned 64-bit integers.
+    # Initalizes a new U256 from a list of four integers.
+    # All four integers must be unsigned 64-bit integers.
     @staticmethod
     def from_list(value_list: List[int]):
         if len(value_list) != 4 or not all(
@@ -102,14 +103,15 @@ class BalanceValue:
         return {"balance": self.value.to_dict()}
 
 
-# Methods for initalizing and inserting token metadata.
+# Method for initalizing and inserting token metadata.
 class TokenMetadataInsert:
     # Defines a key and value for a token
     def __init__(self, key: str, value: str):
         self.key = key
         self.value = value
 
-    # Returns a dictionary object for the `insert` instruction where the value is a list containing the key and value of a token.
+    # Returns a dictionary object for the `insert` instruction where the value
+    # is a list containing the key and value of a token.
     def to_dict(self):
         return {"insert": [self.key, self.value]}
 
@@ -148,7 +150,7 @@ class TokenMetadataValue:
         return {"metadata": self.value.to_dict()}
 
 
-# Methods for initalizing a token's identification, with an Ethereum-style value of at least 256-bits.
+# Method for initalizing a token's identification, with an Ethereum-style value of at least 256-bits.
 class TokenIdPush:
     def __init__(self, value: U256):
         self.value = value
@@ -166,6 +168,7 @@ class TokenIdExtend:
         return {"extend": [item.to_dict() for item in self.items]}
 
 
+# Methods for initalizing, or updating a token's identification.
 class TokenIdInsert:
     def __init__(self, key: int, value: U256):
         self.key = key
@@ -209,13 +212,14 @@ class TokenIdValue:
         return {"tokenIds": self.value.to_dict()}
 
 
-# Methods for initalizing and inserting an allowance tied to an Address.
+# Methods for initalizing or updating an allowance tied to an Address.
 class AllowanceInsert:
     def __init__(self, key: Address, value: U256):
         self.key = key
         self.value = value
 
-    # Returns a dictionary object for the `insert` instruction where the value is the allowance of an Ethereum-style amount declared.
+    # Returns a dictionary object for the `insert` instruction where the value
+    # is the allowance of an Ethereum-style amount declared.
     def to_dict(self):
         return {"insert": [self.key.to_dict(), self.value.to_dict()]}
 
@@ -235,6 +239,7 @@ class AllowanceExtend:
         }
 
 
+# Methods for complete removal of declared Allowances.
 class AllowanceRemove:
     def __init__(self, key: Address, items: List[U256]):
         self.key = key
@@ -248,6 +253,7 @@ class AllowanceRemove:
             ]}
 
 
+# Methods for removal of rights to a delcared allowance.
 class AllowanceRevoke:
     def __init__(self, key: Address):
         self.key = key
