@@ -1,33 +1,42 @@
 from typing import List, Dict, Tuple, Optional, Union
 from enum import Enum
 
-
+# Constructor & Methods for an Ethereum style address.
 class Address:
+    # Updates the bytes of an address if it meets the lengths requirements.
+    # Length requirement is 20 bytes.
     def __init__(self, address_bytes):
         if len(address_bytes) != 20:
             raise ValueError("Address must be 20 bytes long")
         self.address_bytes = bytes(address_bytes)
 
+    # Returns an object where the key is an address and value is the hexed version of address.
     def to_dict(self):
         return {"address": f"0x{self.address_bytes.hex()}"}
 
+    # Takes a hex string representation of an address, and returns a new address.
     @staticmethod
     def from_hex(hex_str):
         if hex_str.startswith('0x'):
             hex_str = hex_str[2:]
         return Address(bytes.fromhex(hex_str))
 
-
+# Methods for working with an Ethereum style U256, little-endian large integer type 256-bit unsigned integer.
 class U256:
+    # Assignes a value to U256 type.
     def __init__(self, value):
         self.value = value
 
+    # Formats the U256 as a hex string.
     def to_hex(self):
         return format(self.value, '064x')
 
+    # Returns an object where key is U256 and value is hex string of U256's value.
     def to_dict(self):
         return {'U256': f"0x{self.to_hex()}"}
 
+    # Initalizes a new U256 from a list of four integers.
+    # All four integers must be unsigned 64-bit integers.
     @staticmethod
     def from_list(value_list: List[int]):
         if len(value_list) != 4 or not all(
@@ -38,6 +47,7 @@ class U256:
             )
         return U256(sum(x << (i * 64) for i, x in enumerate(value_list)))
 
+    # Takes a hex string representation of a U256 value, and returns a new U256 with that value.
     @staticmethod
     def from_hex(hex_str):
         if hex_str.startswith("0x"):
@@ -55,8 +65,11 @@ class Namespace:
 
 
 class AddressOrNamespace:
+    # "This" references to the item itself, when the item is not an Address or Namespace.
     THIS = "This"
+    # The address pointing to an account, or token.
     ADDRESS = Address
+    # The name of an Program or Account.
     NAMESPACE = Namespace
 
     def to_dict(self):
@@ -90,15 +103,20 @@ class BalanceValue:
         return {"balance": self.value.to_dict()}
 
 
+# Method for initalizing and inserting token metadata.
 class TokenMetadataInsert:
+    # Defines a key and value for a token
     def __init__(self, key: str, value: str):
         self.key = key
         self.value = value
 
+    # Returns a dictionary object for the `insert` instruction where the value
+    # is a list containing the key and value of a token.
     def to_dict(self):
         return {"insert": [self.key, self.value]}
 
 
+# Allocates more space for TokenMetadata when needed.
 class TokenMetadataExtend:
     def __init__(self, map: Dict[str, str]):
         self.map = map
@@ -108,13 +126,15 @@ class TokenMetadataExtend:
 
 
 class TokenMetadataRemove:
+    # Defines a key for a token.
     def __init__(self, key: str):
         self.key = key
 
+    # Returns a dictionary object for the `remove` instruction requiring the key of a token.
     def to_dict(self):
         return {"remove": self.key}
 
-
+# Union of methods used for creating, modifying, or removing token metadata.
 class TokenMetadataValue:
     def __init__(
         self,
@@ -130,6 +150,7 @@ class TokenMetadataValue:
         return {"metadata": self.value.to_dict()}
 
 
+# Method for initalizing a token's identification, with an Ethereum-style value of at least 256-bits.
 class TokenIdPush:
     def __init__(self, value: U256):
         self.value = value
@@ -138,6 +159,7 @@ class TokenIdPush:
         return {"push": self.value.to_dict()}
 
 
+# Allocates more space for token id's when needed.
 class TokenIdExtend:
     def __init__(self, items: List[U256]):
         self.items = items
@@ -146,6 +168,7 @@ class TokenIdExtend:
         return {"extend": [item.to_dict() for item in self.items]}
 
 
+# Methods for initalizing, or updating a token's identification.
 class TokenIdInsert:
     def __init__(self, key: int, value: U256):
         self.key = key
@@ -171,6 +194,7 @@ class TokenIdRemove:
         return {"remove": self.key.to_dict()}
 
 
+# Union of methods used for creating, modifying, or removing token identifications.
 class TokenIdValue:
     def __init__(
         self,
@@ -188,15 +212,19 @@ class TokenIdValue:
         return {"tokenIds": self.value.to_dict()}
 
 
+# Methods for initalizing or updating an allowance tied to an Address.
 class AllowanceInsert:
     def __init__(self, key: Address, value: U256):
         self.key = key
         self.value = value
 
+    # Returns a dictionary object for the `insert` instruction where the value
+    # is the allowance of an Ethereum-style amount declared.
     def to_dict(self):
         return {"insert": [self.key.to_dict(), self.value.to_dict()]}
 
 
+# Allocates more space for Allowance's if needed.
 class AllowanceExtend:
     def __init__(self, items: List[Tuple[Address, U256]]):
         self.items = items
@@ -211,6 +239,7 @@ class AllowanceExtend:
         }
 
 
+# Methods for complete removal of declared Allowances.
 class AllowanceRemove:
     def __init__(self, key: Address, items: List[U256]):
         self.key = key
@@ -224,6 +253,7 @@ class AllowanceRemove:
             ]}
 
 
+# Methods for removal of rights to a delcared allowance.
 class AllowanceRevoke:
     def __init__(self, key: Address):
         self.key = key
@@ -581,6 +611,7 @@ class TokenDistribution:
         }
 
 
+# Information used in token creation.
 class CreateInstruction:
     def __init__(
         self,
@@ -608,6 +639,7 @@ class CreateInstruction:
         }
 
 
+# A list of updates to either a token, or a program.
 class UpdateInstruction:
     def __init__(self, updates: List[TokenOrProgramUpdate]):
         self.updates = updates
@@ -618,6 +650,7 @@ class UpdateInstruction:
         }
 
 
+# Information required to make a transfer of assests from one account to another.
 class TransferInstruction:
     def __init__(
         self,
@@ -643,6 +676,7 @@ class TransferInstruction:
         }
 
 
+# Information used in token destruction.
 class BurnInstruction:
     def __init__(
         self,
