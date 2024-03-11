@@ -3,33 +3,61 @@ from enum import Enum
 
 
 class Address:
-    def __init__(self, address_bytes):
+    """
+    Represents a 20 byte derived address that matches the Ethereum network
+    standard:
+        params: address_bytes - A 20 byte array
+
+    It is suggested that the developer use the `from_hex` method and use hex
+    strings to represent addresses, as they are more human readable for
+    debugging purposes
+    """
+
+    def __init__(self, address_bytes: List[int]):
         if len(address_bytes) != 20:
             raise ValueError("Address must be 20 bytes long")
         self.address_bytes = bytes(address_bytes)
 
     def to_dict(self):
+        """Converts an address to hexadecimal string to be included in a JSON
+        blob"""
         return f"0x{self.address_bytes.hex()}"
 
     @staticmethod
     def from_hex(hex_str):
+        """Takes a hexadecimal string and attempts to convert it into an
+        Address"""
         if hex_str.startswith('0x'):
             hex_str = hex_str[2:]
         return Address(bytes.fromhex(hex_str))
 
 
 class U256:
-    def __init__(self, value):
+    """
+    A 256 bit number which can be represented as either a 32 byte array
+    or a hexadecimal string
+
+        params: value - A 20 byte array
+
+    It is suggested that developers use the `from_hex` method and use
+    hex strings to represent U256 and other big numbers.
+    """
+
+    def __init__(self, value: List[int]):
         self.value = value
 
     def to_hex(self):
+        """Converts a U256 into a proper hex format"""
         return format(self.value, '064x')
 
     def to_dict(self):
+        """Converts a U256 into a hex format that can be included in a JSON
+        blob in the format expect"""
         return f"0x{self.to_hex()}"
 
     @staticmethod
     def from_list(value_list: List[int]):
+        """Converts a list of integers (four 64 bit integers) into a U256"""
         if len(value_list) != 4 or not all(
             isinstance(x, int) for x in value_list
         ):
@@ -40,12 +68,14 @@ class U256:
 
     @staticmethod
     def from_hex(hex_str):
+        """Attempts to convert a hexadecimal string into a U256"""
         if hex_str.startswith("0x"):
             hex_str = hex_str[2:]
         value = int(hex_str, 16)
         return U256(value)
 
     def __truediv__(self, other):
+        """Enables deivision on a U256"""
         if not isinstance(other, U256):
             raise TypeError("Division only supported between other U256 types")
         if other.value == 0:
@@ -53,11 +83,18 @@ class U256:
 
         return U256(self.value // other.value)
 
+    # Enables deivision on a U256
     def __floordiv__(self, other):
         return self.__truediv__(other)
 
 
 class Namespace:
+    """
+    Represents and account namespace, namespaces are a future feature
+    of LASR, but are not currently enabled. We highly suggest not using
+    namespaces currently as transactions that use them will fail
+    """
+
     def __init__(self, namespace: str):
         self.namespace = namespace
 
@@ -66,11 +103,24 @@ class Namespace:
 
 
 class AddressOrNamespace:
+    """
+    Represents an enumerable type that can have 3 different `kinds`: `Address`,
+    `Namespace`, or `This`. This is used to tell the protocol which type
+    of account identifier to use. Currently Namespaces are not enabled, so
+    developers should *ONLY* use Address or `This`, `This` always defaults
+    to the address of the contract being called, which is pulled from the
+    `Transaction`'s `to` field
+    """
+
     def __init__(self, kind: str, value: Union[str, Address, Namespace]):
         self.kind = kind
         self.value = value
 
     def to_dict(self):
+        """Based on the `kind` field, it returns a value that can be
+        deserialized in the protocol for the corresponding AddressOrNamespace
+        type"""
+
         if self.kind == "This":
             return "this"
         elif self.kind == "Address":
@@ -80,51 +130,130 @@ class AddressOrNamespace:
 
 
 class Credit:
+    """
+    Represents a Credit variant of the BalanceValue enum, which is effectively
+    a wrapper around a `U256`. This tells the protocol to increase the balance
+    of the associated account. Technically, BalanceValue's should never be
+    used as part of an `UpdateInstruction`, instead, developers should return
+    the `TransferInstruction` or a `CreateInstruction` to alter balance of
+    accounts. Currently, the protocol will reject any `TokenUpdate` that
+    attempts to alter the Balance of a token, this may change in the future.
+    """
+
     def __init__(self, value: U256):
         self.value = value
 
     def to_dict(self):
+        """Converts the Credit instance into a JSON serializable map that the
+        protocol will be capable of deserializing into this type"""
         return {"credit": self.value.to_hex()}
 
 
 class Debit:
+    """
+    Represents a Debit variant of the BalanceValue enum, which is effectively
+    a wrapper around a `U256`. This tells the protocol to reduce the balance
+    of the associated account. BalanceValue's should never be used as part of
+    an `UpdateInstruction`, instead, developers should return the
+    `TransferInstruction`, `BurnInstruction, or a `CreateInstruction` to alter
+    balance of accounts. Currently the protocol will reject any `TokenUpdate`
+    that attempts to alter the Balance of a token, this may change in the
+    future.
+    """
+
     def __init__(self, value: U256):
         self.value = value
 
     def to_dict(self):
+        """Converts the Debit instance into a JSON serializable map that the
+        protocol will be capable of deserializing into this type"""
         return {"debit": self.value.to_hex()}
 
 
 class BalanceValue:
+    """
+    Represents a BalanceValue enumerable type that has 2 variants: Credit &
+    Debit. This is used to tell the protocol to `update` an `Account` `Token`
+    balance. Currently, returning `BalanceValue` as part of an `update` will
+    be rejected. Developers should only use the `TransferInstruction`,
+    `CreateInstruction` or `BurnInstruction` to alter `Account` `Token`
+    balances
+    """
+
     def __init__(self, value):
         self.value = value
 
     def to_dict(self):
+        """Converts the BalanceValueInstance into a JSON serializable map that
+        the protocol will be capable of deserializing into this type"""
         return {"balance": self.value.to_dict()}
 
 
 class TokenMetadataInsert:
+    """
+    Represents a variant in an enumerable type that is used to tell the
+    protocol to update a `Token`'s metadata field. This variant is used to
+    insert a single key -> value pair.
+
+    The pattern is `key: value`, where both are expected to be strings, but
+    can represent any type. Developers should keep track of what metadata
+    they are storing in which tokens so that they can use the metadata
+    in applications.
+    """
+
     def __init__(self, key: str, value: str):
         self.key = key
         self.value = value
 
     def to_dict(self):
+        """Converts this variant instance into a JSON serializable map that the
+        protocol will be capable of deserializing into this variant type"""
         return {"insert": [self.key, self.value]}
 
 
 class TokenMetadataExtend:
+    """
+    Represents a variant in an enumerable type that is used to tell the
+    protocol to update a `Token`'s metadata field. This variant is used to
+    insert multiple key-value pairs, and while it theoretically can be used
+    to update a single key -> value pair, developers should opt for the
+    `TokenMetadataInsert` class if only updating a single kv pair instead.
+
+    The pattern is { k_1: v_1, ..., k_n: v_n }, whicher all keys and all
+    values are expected to be strings, but they can represent any type.
+    It is the Developers responsibility to keep track of what metadata values
+    represent and document them so that they can be used in applications.
+    """
+
     def __init__(self, map: Dict[str, str]):
         self.map = map
 
     def to_dict(self):
+        """
+        Converts this variant instance into a JSON serializable map that the
+        protocol will be capable of deserializing into this variant type
+        """
         return {"extend": self.map}
 
 
 class TokenMetadataRemove:
+    """
+    Represents a variant in an enumerable type that is used to tell the
+    the protocol to update a `Token`'s metadata field. This variant is used
+    to remove a single key -> value pair. Currently, "bag of values" or nested
+    value removals are not supported. To remove an item in a "bag of values"
+    or update a nested value you would want to use the `Insert` or `Extend`
+    method to overwrite the existing value.
+
+    This type simply takes a key.
+    """
+
     def __init__(self, key: str):
         self.key = key
 
     def to_dict(self):
+        """Converts the key into a JSON serializable map that can be understood
+        by the protocol"""
         return {"remove": self.key}
 
 
@@ -140,51 +269,126 @@ class TokenMetadataValue:
         self.value = value
 
     def to_dict(self):
+        """
+        Converts this enum like class into a JSON serializable map that can be
+        deserialized by the protocol into a proper enum variant
+        """
         return {"metadata": self.value.to_dict()}
 
 
 class TokenIdPush:
+    """
+    This type is used to represent an enum variant in the protocol, it is used
+    to `push`, to the end of a vector in the `Token`'s `token_id` field, a new
+    token ID. Token IDs are typically used to represent a non-fungible token
+
+    This type is effectively a wrapper around a U256
+    """
+
     def __init__(self, value: U256):
         self.value = value
 
     def to_dict(self):
+        """
+        Converts this enum variant into a JSON serializable map that can be
+        deserialized by the protocol into the type it represents
+        """
         return {"push": self.value.to_dict()}
 
 
 class TokenIdExtend:
+    """
+    This type is used to represent an enum variant in the protocol, it is used
+    to `Extend` the `Token`'s `token_id` field with more than 1 new token Id.
+    Token IDs are typically used to represent a non-fungible token
+
+    This type is effectively a wrapper around an array of U256's
+    """
+
     def __init__(self, items: List[U256]):
         self.items = items
 
     def to_dict(self):
+        """Converts this enum variant into JSON serializable map that can be
+        deserialized by the protocol into the type it represents"""
         return {"extend": [item.to_dict() for item in self.items]}
 
 
 class TokenIdInsert:
+    """
+    This type is used to represent an enum variant in the protocol, it is used
+    to replace an existing token ID. The key is an integer representing the
+    index position of an item in the `Token`'s `token_ids` field. Use this
+    type with caution as it will replace the token id that is in that position
+    currently. Only use this type if that is the intended behavior. This
+    type will lead to a failure of a transaction if the index position is
+    out of range.
+    """
+
     def __init__(self, key: int, value: U256):
         self.key = key
         self.value = value
 
     def to_dict(self):
+        """Converts this enum variant into a JSON serializable map that can the
+        protocol can deserialize into the type it represents"""
         return {"insert": [self.key, self.value.to_dict()]}
 
 
 class TokenIdPop:
+    """
+    This type is used to represent an enum variant in the protocol, it is used
+    to remove the last item in the `Token`'s `token_ids` field. This will
+    burn the token ID, effectively, if there is not a replacement of the same
+    ID in another account.
+    """
+
     def __init__(self):
         pass
 
     def to_dict(self):
-        return {"pop"}
+        """Returns a string representing this enum variant that can be
+        deserialized back into the type in the protocol"""
+        return "pop"
 
 
 class TokenIdRemove:
+    """
+    This type is used to remove a specific token_id from the `Token`'s
+    `token_ids` field, the `key` in this type is the index of the token_id
+    attempting to be removed, transaction will fail if the `key` is out of
+    range. Use with caution and this could potentially be used to remove the
+    wrong token_id, if the token_ids have changed since being read.
+    """
+
     def __init__(self, key: U256):
         self.key = key
 
     def to_dict(self):
+        """Returns a JSON serializable map representing this type"""
         return {"remove": self.key.to_dict()}
 
 
 class TokenIdValue:
+    """
+    This type represents an enum that is used to update a `Token`'s `token_ids`
+    field. There are 5 methods that can be applied using this enum:
+
+        Push (TokenIdPush)
+        Pop (TokenIdPop)
+        Insert (TokenIdInsert)
+        Extend (TokenIdExtend)
+        Remove (TokenIdRemove)
+
+    *WARNING* It is highly recommended that in the vast majority of cases,
+    Push, Pop, and Extend be used, as these types act on the final item in the
+    array.
+
+    Insert and Remove variants attempt to act on a specific index position
+    in the `token_ids` array, which can be dangerous if not used with extreme
+    caution *WARNING*
+    """
+
     def __init__(
         self,
         value: Union[
@@ -202,6 +406,12 @@ class TokenIdValue:
 
 
 class AllowanceInsert:
+    """
+    This type represents a variant to an enum that is used to insert a new
+    account (program or user) and an amount that the account can spend from
+    the `Account`/`Token` pair
+    """
+
     def __init__(self, key: Address, value: U256):
         self.key = key
         self.value = value
@@ -443,13 +653,32 @@ class LinkedProgramsRemove:
         return {"remove": self.key.to_dict()}
 
 
-class LinkedProgramsValue(Enum):
-    INSERT = LinkedProgramsInsert
-    EXTEND = LinkedProgramsExtend
-    REMOVE = LinkedProgramsRemove
+class LinkedProgramsValue:
+    def __init__(
+        self,
+        kind: str,
+        value: Union[
+            LinkedProgramsInsert,
+            LinkedProgramsExtend,
+            LinkedProgramsRemove
+        ]
+    ):
+        if not isinstance(kind, str):
+            raise ValueError("expected `kind` to be of type `str`")
+
+        valid_kinds = [
+            "linkedprogramsremove",
+            "linkedprogramsextend",
+            "linkedprogramsinsert"
+        ]
+
+        if self.kind.lower() not in valid_kinds:
+            raise ValueError(f"expected `kind` to be one of {valid_kinds}")
+
+        if self.value not isinstance(value, (LinkedProgramsInsert, LinkedProgramsExtend, LinkedProgramsRemove)):
 
     def to_dict(self):
-        return {"linkedPrograms": {"linkedProgramValue": self.value.to_dict()}}
+        return {"linkedProgramValue": self.value.to_dict()}
 
 
 class ProgramMetadataInsert:
