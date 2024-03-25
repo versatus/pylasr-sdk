@@ -13,6 +13,11 @@ from outputs import (
 
 
 class Status:
+    """
+    A type that denotes the status of a token, whether it can be 'used',
+    i.e. have its state altered.
+    """
+
     def __init__(self, state: str):
         valid_states = ["free", "locked"]
 
@@ -34,6 +39,10 @@ class Status:
 
 
 class Token:
+    """
+    a type representing a canonical `Token` in the protocol
+    """
+
     def __init__(
         self,
         program_id: Address,
@@ -46,6 +55,19 @@ class Token:
         data: Dict[str, str],
         status: Status
     ):
+
+        if not all(
+            isinstance(program_id, Address),
+            isinstance(owner_id, Address),
+            isinstance(balance, U256),
+            isinstance(metadata, Dict[str, str]),
+            isinstance(token_ids, List[U256]),
+            isinstance(allowance, Dict[Address, U256]),
+            isinstance(approvals, Dict[Address, List[U256]]),
+            isinstance(data, Dict[str, str]),
+            isinstance(status, Status),
+        ):
+            raise ValueError
 
         self.program_id = program_id
         self.owner_id = owner_id
@@ -98,6 +120,11 @@ class Token:
 
 class AccountType:
     def __init__(self, kind: str, value: Union[None, Address]):
+        valid_kinds = ["user", "program"]
+
+        if kind not in valid_kinds:
+            return ValueError
+
         self.kind = kind
         self.value = value
 
@@ -110,6 +137,10 @@ class AccountType:
 
 
 class Account:
+    """
+    A type representing the canonical `Account` type in the LASR protocol
+    """
+
     def __init__(
         self,
         account_type: AccountType,
@@ -121,6 +152,21 @@ class Account:
         program_account_metadata: Dict[str, str],
         program_account_linked_programs: Set[AddressOrNamespace]
     ):
+
+        if not all(
+            isinstance(account_type, AccountType),
+            isinstance(program_namespace, AddressOrNamespace),
+            isinstance(owner_address, Address),
+            isinstance(programs, Dict[Address, Token]),
+            isinstance(nonce, U256),
+            isinstance(program_account_data, Dict[str, str]),
+            isinstance(program_account_metadata, Dict[str, str]),
+            isinstance(
+                program_account_linked_programs, Set[AddressOrNamespace]
+            ),
+        ):
+            raise ValueError
+
         self.account_type = account_type
         self.program_namespace = program_namespace
         self.owner_address = owner_address
@@ -185,7 +231,23 @@ class Account:
 
 
 class TransactionType:
+    """
+    A type representing a deserialized canonical `TransactionType` in the LASR
+    protocol
+    """
+
     def __init__(self, kind: str, nonce: U256):
+        valid_kinds = [
+            "bridgeIn",
+            "send",
+            "call",
+            "bridgeOut",
+            "registerProgram"
+        ]
+
+        if kind not in valid_kinds:
+            raise ValueError
+
         self.kind = kind
         self.nonce = nonce
 
@@ -204,6 +266,10 @@ class TransactionType:
 
 
 class Transaction:
+    """
+    A type representing the canonical `Transaction` type in the LASR protocol
+    """
+
     def __init__(
         self,
         transaction_type: TransactionType,
@@ -218,6 +284,22 @@ class Transaction:
         r: U256,
         s: U256,
     ):
+
+        if not all(
+            isinstance(transaction_type, TransactionType),
+            isinstance(caller, Address),
+            isinstance(receiver, Address),
+            isinstance(program_id, Address),
+            isinstance(op, str),
+            isinstance(inputs, str),
+            isinstance(value, U256),
+            isinstance(nonce, U256),
+            isinstance(v, int),
+            isinstance(r, U256),
+            isinstance(s, U256)
+        ):
+            raise ValueError
+
         self.transaction_type = transaction_type
         self.caller = caller
         self.receiver = receiver
@@ -279,6 +361,10 @@ class Transaction:
 
 
 class Inputs:
+    """
+    A type representing the canonical computeInputs type in the LASR protocol
+    """
+
     def __init__(
         self,
         version: int,
@@ -287,6 +373,16 @@ class Inputs:
         op: str,
         contract_inputs: str
     ):
+
+        if not all(
+            isinstance(version, int),
+            isinstance(account_info, Account),
+            isinstance(transaction, Transaction),
+            isinstance(op, str),
+            isinstance(contract_inputs, str),
+        ):
+            raise ValueError
+
         self.version = version
         self.account_info = account_info
         self.transaction = transaction
